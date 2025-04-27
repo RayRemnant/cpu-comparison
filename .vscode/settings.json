@@ -1,0 +1,15 @@
+{
+  "editor.defaultFormatter": null, // Use the default VS Code formatter
+  "editor.tabSize": 2, // Use 2 spaces for indentation
+  "editor.insertSpaces": true, // Use spaces instead of tabs
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "editor.formatOnSave": true, // Enable format on save
+}
