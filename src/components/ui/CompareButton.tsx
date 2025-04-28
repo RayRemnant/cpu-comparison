@@ -1,6 +1,6 @@
 import React from 'react';
-import { Plus } from 'lucide-react';
 import { CPU } from '../../types';
+import { Plus, Minus } from 'lucide-react';
 
 interface CompareButtonProps {
   cpu: CPU;
@@ -10,17 +10,11 @@ interface CompareButtonProps {
 
 export const CompareButton: React.FC<CompareButtonProps> = ({ cpu, onCompare, isSelected }) => {
   return (
-    <button
+    <div
+      className="cursor-pointer rounded-full p-2 bg-[radial-gradient(circle,rgba(255,255,255,0.5),rgba(255,255,255,0))]"
       onClick={() => onCompare(cpu)}
-      className={`
-        flex items-center px-3 py-1.5 text-sm font-medium rounded transition-colors shadow-sm
-        ${isSelected 
-          ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
-          : 'bg-blue-600 text-white hover:bg-blue-700'}
-      `}
     >
-      <Plus className="h-4 w-4 mr-1" />
-      {isSelected ? 'Selected' : 'Compare'}
-    </button>
+      {isSelected ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+    </div>
   );
 };
