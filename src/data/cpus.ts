@@ -27,6 +27,11 @@ export const cpus: CPU[] = [
     },
     features: ['PCIe 5.0', 'DDR5', '5nm', 'SMT'],
     imageUrl: 'https://images.pexels.com/photos/5474285/pexels-photo-5474285.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    shop: {
+      amazon: { price: 699 },
+      ebay: { price: 689 },
+      newegg: { price: 695 },
+    },
   },
   {
     id: '2',
@@ -54,6 +59,11 @@ export const cpus: CPU[] = [
     },
     features: ['PCIe 5.0', 'DDR5', 'Hybrid Architecture', 'P-cores & E-cores'],
     imageUrl: 'https://images.pexels.com/photos/3520694/pexels-photo-3520694.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    shop: {
+      amazon: { price: 589 },
+      ebay: { price: 579 },
+      newegg: { price: 585 },
+    },
   },
   {
     id: '3',
@@ -81,6 +91,11 @@ export const cpus: CPU[] = [
     },
     features: ['PCIe 5.0', 'DDR5', '5nm', '3D V-Cache'],
     imageUrl: 'https://images.pexels.com/photos/2582928/pexels-photo-2582928.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    shop: {
+      amazon: { price: 449 },
+      ebay: { price: 439 },
+      newegg: { price: 445 },
+    },
   },
   {
     id: '4',
@@ -108,6 +123,11 @@ export const cpus: CPU[] = [
     },
     features: ['PCIe 5.0', 'DDR5', 'Hybrid Architecture', 'P-cores & E-cores'],
     imageUrl: 'https://images.pexels.com/photos/4195324/pexels-photo-4195324.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    shop: {
+      amazon: { price: 319 },
+      ebay: { price: 309 },
+      newegg: { price: 315 },
+    },
   },
   {
     id: '5',
@@ -135,6 +155,11 @@ export const cpus: CPU[] = [
     },
     features: ['Neural Engine', 'Unified Memory', '3nm', 'Custom GPU'],
     imageUrl: 'https://images.pexels.com/photos/1779487/pexels-photo-1779487.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    shop: {
+      amazon: { price: 699 },
+      ebay: { price: 689 },
+      newegg: { price: 695 },
+    },
   },
   {
     id: '6',
@@ -162,5 +187,10 @@ export const cpus: CPU[] = [
     },
     features: ['PCIe 5.0', 'DDR5', '5nm', 'SMT'],
     imageUrl: 'https://images.pexels.com/photos/2582928/pexels-photo-2582928.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
+    shop: {
+      amazon: { price: 249 },
+      ebay: { price: 239 },
+      newegg: { price: 245 },
+    },
   },
 ];

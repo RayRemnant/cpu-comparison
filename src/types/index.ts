@@ -22,6 +22,11 @@ export interface CPU {
     multiCore: number;
     gaming: number;
   };
+  shop: {
+    amazon: { price: number };
+    ebay: { price: number };
+    newegg: { price: number };
+  };
   features: string[];
   imageUrl: string;
 }
