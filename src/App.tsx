@@ -7,7 +7,7 @@ import Compare from './pages/Compare';
 function App() {
   return (
     <BrowserRouter>
-      <Toaster position="top-right" />
+      <Toaster position="bottom-right" />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/benchmarks" element={<Benchmarks />} />
