@@ -21,21 +21,35 @@ const defaultFilters: FilterOptions = {
 };
 
 const Home: React.FC = () => {
-  const [cpus, setCpus] = useState<CPU[]>(cpuData);
   const [filteredCpus, setFilteredCpus] = useState<CPU[]>(cpuData);
   const [filters, setFilters] = useState<FilterOptions>(defaultFilters);
   const [sortBy, setSortBy] = useState<SortOption>('price');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCPUs, setSelectedCPUs] = useAtom(selectedCPUsAtom);
+  const [favorites, setFavorites] = useState<CPU[]>(() => {
+    const storedFavorites = localStorage.getItem('favorites');
+    return storedFavorites ? JSON.parse(storedFavorites) : [];
+  });
 
   const handleFavorite = (cpu: CPU) => {
-    // In a real application, this would save to localStorage or a backend
-    console.log('Added to favorites:', cpu.name);
+    const isFavorite = favorites.some((favorite) => favorite.id === cpu.id);
+    if (isFavorite) {
+      const updatedFavorites = favorites.filter((favorite) => favorite.id !== cpu.id);
+      setFavorites(updatedFavorites);
+      localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+      toast.success(`Removed ${cpu.name} from favorites`);
+    } else {
+      console.log("SEEET FAVS", favorites, cpu);
+      const updatedFavorites = [...favorites, cpu];
+      setFavorites(updatedFavorites);
+      localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+      toast.success(`Added ${cpu.name} to favorites`);
+    }
   };
 
   const handleCompare = (cpu: CPU) => {
-    if (selectedCPUs.some(selected => selected.id === cpu.id)) {
-      setSelectedCPUs(selectedCPUs.filter(selected => selected.id !== cpu.id));
+    if (selectedCPUs.some((selected) => selected.id === cpu.id)) {
+      setSelectedCPUs(selectedCPUs.filter((selected) => selected.id !== cpu.id));
       toast.success(`Removed ${cpu.name} from comparison`);
     } else {
       setSelectedCPUs([...selectedCPUs, cpu]);
@@ -58,30 +72,32 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     let result = cpuData;
-    
+
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      result = result.filter(cpu => 
-        cpu.name.toLowerCase().includes(query) || 
-        cpu.brand.toLowerCase().includes(query) ||
-        cpu.socket.toLowerCase().includes(query)
+      result = result.filter(
+        (cpu) =>
+          cpu.name.toLowerCase().includes(query) ||
+          cpu.brand.toLowerCase().includes(query) ||
+          cpu.socket.toLowerCase().includes(query)
       );
     }
-    
+
     if (filters.brands.length > 0) {
-      result = result.filter(cpu => filters.brands.includes(cpu.brand));
+      result = result.filter((cpu) => filters.brands.includes(cpu.brand));
     }
-    
-    result = result.filter(cpu => 
-      cpu.cores >= filters.minCores && 
-      cpu.cores <= filters.maxCores &&
-      cpu.price >= filters.minPrice &&
-      cpu.price <= filters.maxPrice &&
-      (filters.socket === '' || cpu.socket === filters.socket)
+
+    result = result.filter(
+      (cpu) =>
+        cpu.cores >= filters.minCores &&
+        cpu.cores <= filters.maxCores &&
+        cpu.price >= filters.minPrice &&
+        cpu.price <= filters.maxPrice &&
+        (filters.socket === '' || cpu.socket === filters.socket)
     );
-    
+
     result.sort((a, b) => {
-      switch(sortBy) {
+      switch (sortBy) {
         case 'price':
           return a.price - b.price;
         case 'cores':
@@ -102,7 +118,7 @@ const Home: React.FC = () => {
           return 0;
       }
     });
-    
+
     setFilteredCpus(result);
   }, [filters, searchQuery, sortBy]);
 
@@ -131,7 +147,7 @@ const Home: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-1/4">
             <FilterPanel
@@ -140,7 +156,7 @@ const Home: React.FC = () => {
               onReset={handleResetFilters}
             />
           </div>
-          
+
           <div className="md:w-3/4">
             <div className="mb-6 flex justify-between items-center">
               <div className="flex items-center">
@@ -151,7 +167,7 @@ const Home: React.FC = () => {
               </div>
               <SortDropdown currentSort={sortBy} onSortChange={handleSortChange} />
             </div>
-            
+
             {filteredCpus.length === 0 ? (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
                 <Cpu className="mx-auto h-12 w-12 text-gray-400" />
@@ -173,6 +189,7 @@ const Home: React.FC = () => {
                 selectedCPUs={selectedCPUs}
                 onCompare={handleCompare}
                 onFavorite={handleFavorite}
+                favorites={favorites} // Pass favorites to CPUGrid
               />
             )}
           </div>

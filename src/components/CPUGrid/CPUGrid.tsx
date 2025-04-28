@@ -7,13 +7,15 @@ interface CPUGridProps {
   selectedCPUs: CPU[];
   onCompare: (cpu: CPU) => void;
   onFavorite: (cpu: CPU) => void;
+  favorites?: CPU[];
 }
 
-const CPUGrid: React.FC<CPUGridProps> = ({ 
-  cpus, 
-  selectedCPUs, 
-  onCompare, 
-  onFavorite 
+const CPUGrid: React.FC<CPUGridProps> = ({
+  cpus,
+  selectedCPUs,
+  onCompare,
+  onFavorite,
+  favorites = [],
 }) => {
   const isSelected = (cpu: CPU) => {
     return selectedCPUs.some(selected => selected.id === cpu.id);
@@ -28,6 +30,7 @@ const CPUGrid: React.FC<CPUGridProps> = ({
           onCompare={onCompare}
           onFavorite={onFavorite}
           isSelected={isSelected(cpu)}
+          favorite={favorites.some(fav => fav.id === cpu.id)}
         />
       ))}
     </div>
