@@ -7,6 +7,7 @@ import { CPU, FilterOptions } from '../types';
 import { cpus } from '../data/cpus';
 import { selectedCPUsAtom } from '../store/atoms';
 import toast from 'react-hot-toast';
+import { PinButton } from '../components/ui/PinButton';
 
 type BenchmarkTab = 'singleCore' | 'multiCore' | 'gaming';
 
@@ -23,6 +24,7 @@ const defaultFilters: FilterOptions = {
 const Benchmarks: React.FC = () => {
   const [filters, setFilters] = useState<FilterOptions>(defaultFilters);
   const [selectedCPUs, setSelectedCPUs] = useAtom(selectedCPUsAtom);
+  const [pinnedCPUs, setPinnedCPUs] = useState<CPU[]>([]);
   const [activeTab, setActiveTab] = useState<BenchmarkTab>('singleCore');
 
   const handleAddToCompare = (cpu: CPU) => {
@@ -35,6 +37,18 @@ const Benchmarks: React.FC = () => {
     }
   };
 
+  const handlePinCPU = (cpu: CPU) => {
+    if (pinnedCPUs.some(pinned => pinned.id === cpu.id)) {
+      setPinnedCPUs(pinnedCPUs.filter(pinned => pinned.id !== cpu.id));
+      toast.success(`Unpinned ${cpu.name}`);
+    } else {
+      setPinnedCPUs([...pinnedCPUs, cpu]);
+      toast.success(`Pinned ${cpu.name}`);
+    }
+  };
+
+  const isPinned = (cpu: CPU) => pinnedCPUs.some(pinned => pinned.id === cpu.id);
+
   const isSelected = (cpu: CPU) => selectedCPUs.some(selected => selected.id === cpu.id);
 
   const filteredCPUs = cpus.filter(cpu => {
@@ -43,37 +57,13 @@ const Benchmarks: React.FC = () => {
     if (cpu.price < filters.minPrice || cpu.price > filters.maxPrice) return false;
     if (filters.socket && cpu.socket !== filters.socket) return false;
     return true;
-  }).sort((a, b) => {
-    switch (activeTab) {
-      case 'singleCore':
-        return b.benchmarks.singleCore - a.benchmarks.singleCore;
-      case 'multiCore':
-        return b.benchmarks.multiCore - a.benchmarks.multiCore;
-      case 'gaming':
-        return b.benchmarks.gaming - a.benchmarks.gaming;
-      default:
-        return 0;
-    }
-  });
+  })
+
+  const displayedCPUs = [...pinnedCPUs, ...filteredCPUs.filter(cpu => !isPinned(cpu))].sort((a, b) => b.benchmarks[activeTab] - a.benchmarks[activeTab]);
 
   const getMaxValue = (tab: BenchmarkTab) => {
-    switch (tab) {
-      case 'singleCore':
-        return 3500;
-      case 'multiCore':
-        return 35000;
-      case 'gaming':
-        return 100;
-      default:
-        return 100;
-    }
-  };
-
-  const formatValue = (value: number, tab: BenchmarkTab) => {
-    if (tab === 'gaming') {
-      return `${value}/100`;
-    }
-    return value.toLocaleString();
+    const values = displayedCPUs.map(cpu => cpu.benchmarks[tab]);
+    return Math.max(...values);
   };
 
   const getBarColor = (brand: CPU["brand"]) => {
@@ -130,7 +120,7 @@ const Benchmarks: React.FC = () => {
 
           <div className="p-6">
             <div className="space-y-4">
-              {filteredCPUs.map((cpu) => {
+              {displayedCPUs.map((cpu) => {
                 const value = activeTab === 'singleCore' ? cpu.benchmarks.singleCore :
                   activeTab === 'multiCore' ? cpu.benchmarks.multiCore :
                     cpu.benchmarks.gaming;
@@ -138,35 +128,43 @@ const Benchmarks: React.FC = () => {
                 const percentage = (value / maxValue) * 100;
 
                 return (
-                  <div className="h-10 w-full bg-gray-100 rounded-lg overflow-hidden relative">
-                    <div
-                      className={`h-full ${getBarColor(cpu.brand)} transition-all duration-500`}
-                      style={{ width: `${percentage}%` }}
-                    >
-                      <div className="h-full flex items-center px-3 space-x-2">
-                        <span className={`
-                              inline-flex items-center px-1.5 py-0.5 rounded-sm text-xs font-medium
-                              text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]
-                              ${cpu.brand === 'AMD' ? 'bg-red-700' :
-                            cpu.brand === 'Intel' ? 'bg-blue-700' :
-                              'bg-gray-700'}
-                            `}>
-                          {cpu.brand}
-                        </span>
-                        <span className="font-medium text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] truncate">
-                          {cpu.name}
-                        </span>
-                        <span className="font-medium text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
-                          {formatValue(value, activeTab)}
-                        </span>
+                  <div className='flex justify-between gap-2' key={cpu.id}>
+                    <div className="h-10 w-full bg-gray-100 rounded-lg overflow-hidden relative">
+                      <div
+                        className={`h-full ${getBarColor(cpu.brand)} transition-all duration-500 inline-block`}
+                        style={{ width: `${percentage}%` }}
+                      >
+                        <div className="h-full flex items-center px-3 space-x-2">
+                          <span className="text-shadow-outline font-medium text-white text-nowrap">
+                            {cpu.brand} {cpu.name} - {percentage.toFixed(1)}%
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center">
+                    <div className="flex items-center space-x-2">
                       <CompareButton
                         cpu={cpu}
                         onCompare={handleAddToCompare}
                         isSelected={isSelected(cpu)}
                       />
+                      <PinButton
+                        cpu={cpu}
+                        onPin={handlePinCPU}
+                        isPinned={isPinned(cpu)}
+                      />
+                      <div className="flex space-x-2">
+                        {Object.entries(cpu.shop).map(([shopName, shopInfo]) => (
+                          <a
+                            key={shopName}
+                            href={`#`} // Replace with actual shop link if available
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-1 px-3 rounded"
+                          >
+                            (${shopInfo.price})
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 );
