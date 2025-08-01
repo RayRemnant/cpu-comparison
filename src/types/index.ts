@@ -8,8 +8,14 @@ export interface Geekbench {
   multiScore: number;
 }
 
+export type Tld = "it" | "com" | "co.uk" | "de" | "fr" | "es" | "au" | "jp";
+
+export type Asins = {
+    [key in Tld]: string[];
+  }
+
 export interface CPU {
-  id: string;
+  _id: string;
   name: string;
   brand: 'AMD' | 'Intel' | 'Apple' | 'Other';
   series: string;
@@ -41,6 +47,7 @@ export interface CPU {
   };
   features: string[];
   imageUrl: string;
+  asins?: Asins
 }
 
 export type SortOption = 'price' | 'cores' | 'baseClock' | 'boostClock' | 'singleCore' | 'multiCore' | 'tdp' | 'releaseDate';

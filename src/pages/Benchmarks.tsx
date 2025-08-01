@@ -53,9 +53,9 @@ const Benchmarks: React.FC = () => {
   }, []);
 
   const handleAddToCompare = (cpu: CPU) => {
-    if (selectedCPUs.some((selected) => selected.id === cpu.id)) {
+    if (selectedCPUs.some((selected) => selected._id === cpu._id)) {
       setSelectedCPUs(
-        selectedCPUs.filter((selected) => selected.id !== cpu.id),
+        selectedCPUs.filter((selected) => selected._id !== cpu._id),
       );
       toast.success(`Removed ${cpu.name} from comparison`);
     } else {
@@ -65,8 +65,8 @@ const Benchmarks: React.FC = () => {
   };
 
   const handlePinCPU = (cpu: CPU) => {
-    if (pinnedCPUs.some((pinned) => pinned.id === cpu.id)) {
-      setPinnedCPUs(pinnedCPUs.filter((pinned) => pinned.id !== cpu.id));
+    if (pinnedCPUs.some((pinned) => pinned._id === cpu._id)) {
+      setPinnedCPUs(pinnedCPUs.filter((pinned) => pinned._id !== cpu._id));
       toast.success(`Unpinned ${cpu.name}`);
     } else {
       setPinnedCPUs([...pinnedCPUs, cpu]);
@@ -75,10 +75,10 @@ const Benchmarks: React.FC = () => {
   };
 
   const isPinned = (cpu: CPU) =>
-    pinnedCPUs.some((pinned) => pinned.id === cpu.id);
+    pinnedCPUs.some((pinned) => pinned._id === cpu._id);
 
   const isSelected = (cpu: CPU) =>
-    selectedCPUs.some((selected) => selected.id === cpu.id);
+    selectedCPUs.some((selected) => selected._id === cpu._id);
 
   const filteredCPUs = cpus.filter((cpu) => {
     if (cpu[activeSourceTab] === undefined) return false;
@@ -180,8 +180,10 @@ const Benchmarks: React.FC = () => {
                 const maxValue = getMaxValue(activeSourceTab);
                 const percentage = (value / maxValue) * 100;
 
+                // fetch amazon price
+
                 return (
-                  <div className="flex justify-between gap-2" key={cpu.id}>
+                  <div className="flex justify-between gap-2" key={cpu._id}>
                     <div className="relative h-10 w-full overflow-hidden rounded-lg bg-gray-100">
                       <div
                         className={`h-full ${getBarColor(cpu.brand)} inline-block transition-all duration-500`}
@@ -205,7 +207,7 @@ const Benchmarks: React.FC = () => {
                         onPin={handlePinCPU}
                         isPinned={isPinned(cpu)}
                       />
-                      <ButtonDropDown />
+                      <ButtonDropDown asins={cpu.asins} tld={"it"} />
                       {/* <button className="text-sm text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md">
                         {cpu.shop[activeTab].price}
                       {/* <div className="flex space-x-2">
