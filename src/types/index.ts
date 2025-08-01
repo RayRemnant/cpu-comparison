@@ -1,3 +1,13 @@
+export interface Passmark {
+  cpuScore: number;
+  threadScore: number;
+}
+
+export interface Geekbench {
+  singleScore: number;
+  multiScore: number;
+}
+
 export interface CPU {
   id: string;
   name: string;
@@ -22,6 +32,8 @@ export interface CPU {
     multiCore: number;
     gaming: number;
   };
+  passmark: Passmark;
+  geekbench: Geekbench;
   shop: {
     amazon: { price: number };
     ebay: { price: number };

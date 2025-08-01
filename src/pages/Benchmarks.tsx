@@ -1,16 +1,15 @@
-import React, { useState } from "react";
+import React, { act, useEffect, useState } from "react";
 import { useAtom } from "jotai";
 import Layout from "../components/Layout/Layout";
 import FilterPanel from "../components/Filters/FilterPanel";
 import { CompareButton } from "../components/ui/CompareButton";
-import { CPU, FilterOptions } from "../types";
-import { cpus } from "../data/cpus";
+import { CPU, FilterOptions, Passmark, Geekbench } from "../types";
 import { selectedCPUsAtom } from "../store/atoms";
 import toast from "react-hot-toast";
 import { PinButton } from "../components/ui/PinButton";
 import { ButtonDropDown } from "../components/ui/ButtonDropdown";
 
-type BenchmarkTab = "singleCore" | "multiCore" | "gaming";
+type BenchmarkSourceTab = "passmark" | "geekbench";
 
 const defaultFilters: FilterOptions = {
   brands: [],
@@ -23,10 +22,35 @@ const defaultFilters: FilterOptions = {
 };
 
 const Benchmarks: React.FC = () => {
+
+
+
+
+  const [cpus, setCpus] = useState<CPU[]>([]);
   const [filters, setFilters] = useState<FilterOptions>(defaultFilters);
   const [selectedCPUs, setSelectedCPUs] = useAtom(selectedCPUsAtom);
   const [pinnedCPUs, setPinnedCPUs] = useState<CPU[]>([]);
-  const [activeTab, setActiveTab] = useState<BenchmarkTab>("singleCore");
+  const [activeSourceTab, setActiveSourceTab] = useState<BenchmarkSourceTab>("passmark");
+
+  const [passmarkTab, setPassmarkTab] = useState<keyof Passmark>("cpuScore");
+  const [geekbenchTab, setGeekbenchTab] = useState<keyof Geekbench>("singleScore");
+
+  useEffect(() => {
+    const x = async () => {
+      let response = await fetch("http://localhost:3000/api/find", {
+        method: "POST",
+        body: JSON.stringify({
+          databaseName: "codex",
+          collectionName: "cpus",
+        }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      setCpus(await response.json() || []);
+    }
+
+    x();
+  }, []);
 
   const handleAddToCompare = (cpu: CPU) => {
     if (selectedCPUs.some((selected) => selected.id === cpu.id)) {
@@ -57,6 +81,7 @@ const Benchmarks: React.FC = () => {
     selectedCPUs.some((selected) => selected.id === cpu.id);
 
   const filteredCPUs = cpus.filter((cpu) => {
+    if (cpu[activeSourceTab] === undefined) return false;
     if (filters.brands.length > 0 && !filters.brands.includes(cpu.brand))
       return false;
     if (cpu.cores < filters.minCores || cpu.cores > filters.maxCores)
@@ -70,10 +95,26 @@ const Benchmarks: React.FC = () => {
   const displayedCPUs = [
     ...pinnedCPUs,
     ...filteredCPUs.filter((cpu) => !isPinned(cpu)),
-  ].sort((a, b) => b.benchmarks[activeTab] - a.benchmarks[activeTab]);
+  ].sort((a, b) => {
+    if (activeSourceTab === "passmark") {
+      return b?.[activeSourceTab]?.[passmarkTab] - a?.[activeSourceTab]?.[passmarkTab];
+    }
+    if (activeSourceTab === "geekbench") {
+      return b?.[activeSourceTab]?.[geekbenchTab] - a?.[activeSourceTab]?.[geekbenchTab];
+    }
+    return 0;
+  });
 
-  const getMaxValue = (tab: BenchmarkTab) => {
-    const values = displayedCPUs.map((cpu) => cpu.benchmarks[tab]);
+  const getMaxValue = (sourceTab: BenchmarkSourceTab) => {
+    const values = displayedCPUs.map((cpu) => {
+      if (sourceTab === "passmark") {
+        return cpu?.[sourceTab]?.[passmarkTab] || 0;
+      }
+      if (sourceTab === "geekbench") {
+        return cpu?.[sourceTab]?.[geekbenchTab] || 0;
+      }
+      return 0;
+    });
     return Math.max(...values);
   };
 
@@ -114,21 +155,18 @@ const Benchmarks: React.FC = () => {
 
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex">
-              {(["singleCore", "multiCore", "gaming"] as const).map((tab) => (
+              {(["passmark", "geekbench"] as const).map((tab) => (
                 <button
                   key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`border-b-2 px-6 py-4 text-sm font-medium transition-colors ${
-                    activeTab === tab
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                  } `}
+                  onClick={() => {
+                    setActiveSourceTab(tab)
+                  }}
+                  className={`border-b-2 px-6 py-4 text-sm font-medium transition-colors ${activeSourceTab === tab
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                    } `}
                 >
-                  {tab === "singleCore"
-                    ? "Single-Core Performance"
-                    : tab === "multiCore"
-                      ? "Multi-Core Performance"
-                      : "Gaming Performance"}
+                  {tab}
                 </button>
               ))}
             </nav>
@@ -137,13 +175,9 @@ const Benchmarks: React.FC = () => {
           <div className="p-6">
             <div className="space-y-4">
               {displayedCPUs.map((cpu) => {
-                const value =
-                  activeTab === "singleCore"
-                    ? cpu.benchmarks.singleCore
-                    : activeTab === "multiCore"
-                      ? cpu.benchmarks.multiCore
-                      : cpu.benchmarks.gaming;
-                const maxValue = getMaxValue(activeTab);
+                const value = activeSourceTab == "passmark" ? cpu?.[activeSourceTab]?.[passmarkTab] :
+                  activeSourceTab == "geekbench" ? cpu?.[activeSourceTab]?.[geekbenchTab] : 0;
+                const maxValue = getMaxValue(activeSourceTab);
                 const percentage = (value / maxValue) * 100;
 
                 return (
