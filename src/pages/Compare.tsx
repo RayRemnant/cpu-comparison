@@ -19,22 +19,22 @@ const Compare: React.FC = () => {
   const navigate = useNavigate();
 
   const handleRemove = (id: string) => {
-    setSelectedCPUs(selectedCPUs.filter(cpu => cpu.id !== id));
+    setSelectedCPUs(selectedCPUs.filter(cpu => cpu._id !== id));
   };
 
   const filteredCPUs = useMemo(() => {
     if (!searchQuery) return [];
     const query = searchQuery.toLowerCase();
-    return cpuData.filter(cpu => 
-      !selectedCPUs.some(selected => selected.id === cpu.id) &&
+    return cpuData.filter(cpu =>
+      !selectedCPUs.some(selected => selected._id === cpu._id) &&
       (cpu.name.toLowerCase().includes(query) ||
-       cpu.brand.toLowerCase().includes(query) ||
-       cpu.socket.toLowerCase().includes(query))
+        cpu.brand.toLowerCase().includes(query) ||
+        cpu.socket.toLowerCase().includes(query))
     );
   }, [searchQuery, selectedCPUs]);
 
   const handleAddCPU = (cpuId: string) => {
-    const cpu = cpuData.find(c => c.id === cpuId);
+    const cpu = cpuData.find(c => c._id === cpuId);
     if (cpu) {
       setSelectedCPUs([...selectedCPUs, cpu]);
       setSearchQuery('');
@@ -63,11 +63,11 @@ const Compare: React.FC = () => {
                   <div className="mt-2 space-y-1">
                     {filteredCPUs.map(cpu => (
                       <Button
-                        key={cpu.id}
+                        key={cpu._id}
                         variant="ghost"
                         fullWidth
                         className="justify-start"
-                        onClick={() => handleAddCPU(cpu.id)}
+                        onClick={() => handleAddCPU(cpu._id)}
                       >
                         {cpu.name}
                       </Button>
